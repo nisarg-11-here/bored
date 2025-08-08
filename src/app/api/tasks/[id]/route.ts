@@ -4,13 +4,14 @@ import Task from '@/models/Task';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
     await dbConnect();
     
-    const task = await Task.findByIdAndUpdate(params.id, body, {
+    const { id } = await params;
+    const task = await Task.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,
     });
@@ -33,12 +34,13 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await dbConnect();
     
-    const task = await Task.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const task = await Task.findByIdAndDelete(id);
     
     if (!task) {
       return NextResponse.json(

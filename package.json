@@ -6,28 +6,41 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "db:health": "node scripts/test-db.js",
+    "db:check": "curl -s http://localhost:3000/api/health/database | jq .",
+    "db:debug": "node scripts/debug-env.js",
+    "deploy:prepare": "./scripts/deploy.sh"
   },
   "dependencies": {
     "@types/mongodb": "^4.0.7",
+    "dotenv": "^17.2.1",
     "lucide-react": "^0.537.0",
     "mongodb": "^6.18.0",
     "mongoose": "^8.17.1",
     "next": "15.4.6",
-    "node": "^22.18.0",
     "openai": "^5.12.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/supertest": "^6.0.3",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
-    "tailwindcss": "^4",
+    "jest": "^30.0.5",
+    "supertest": "^7.1.4",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }
 }
