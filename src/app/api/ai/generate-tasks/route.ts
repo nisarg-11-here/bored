@@ -1,26 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Check if OpenAI API key is available
-if (!process.env.OPENAI_API_KEY) {
-  console.warn('OPENAI_API_KEY is not set. AI features will be disabled.');
-}
-
-const openai = process.env.OPENAI_API_KEY 
-  ? new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
-  : null;
-
 export async function POST(request: NextRequest) {
   try {
-    // Check if OpenAI is available
-    if (!openai) {
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json(
         { error: 'AI features are not configured. Please set OPENAI_API_KEY environment variable.' },
         { status: 503 }
       );
     }
+
+    // Initialize OpenAI client inside the function
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
 
     const { mood, energyLevel, availableTime, scheduleNotes } = await request.json();
 
