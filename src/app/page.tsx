@@ -197,7 +197,9 @@ export default function Home() {
         setGeneratedTasks(generatedTasksData);
         showToast(`Generated ${generatedTasksData.length} new task suggestions!`, 'info');
       } else {
-        showToast('Failed to generate tasks', 'error');
+        const errorData = await response.json();
+        const errorMessage = errorData.error || 'Failed to generate tasks';
+        showToast(errorMessage, 'error');
       }
     } catch (error) {
       console.error('Failed to generate AI tasks:', error);

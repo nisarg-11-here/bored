@@ -1,19 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Check if OpenAI API key is available
+if (!process.env.OPENAI_API_KEY) {
+  console.warn('OPENAI_API_KEY is not set. AI features will be disabled.');
+}
+
+const openai = process.env.OPENAI_API_KEY 
+  ? new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+  : null;
 
 export async function POST(request: NextRequest) {
   try {
-    const { mood, energyLevel, availableTime } = await request.json();
+    // Check if OpenAI is available
+    if (!openai) {
+      return NextResponse.json(
+        { error: 'AI features are not configured. Please set OPENAI_API_KEY environment variable.' },
+        { status: 503 }
+      );
+    }
+
+    const { mood, energyLevel, availableTime, scheduleNotes } = await request.json();
 
     const prompt = `Generate 3 engaging and personalized tasks to help combat boredom. Consider the following:
 
 Mood: ${mood}
 Energy Level: ${energyLevel}/10
 Available Time: ${availableTime} minutes
+${scheduleNotes ? `Schedule Notes: ${scheduleNotes}` : ''}
 
 Generate tasks that are:
 - Appropriate for the given mood and energy level
@@ -25,8 +41,9 @@ Generate tasks that are:
 Format each task as a JSON object with:
 - title: A catchy, specific task title
 - description: A brief explanation of what to do
-- category: One of [personal, work, health, learning, creative, social]
+- category: One of [personal, work, health, learning, creative, social, focus, planning]
 - priority: One of [low, medium, high] based on energy level and mood
+- estimatedTime: Estimated time in minutes (number)
 
 Return only a JSON array of 3 task objects, no other text.`;
 
@@ -58,8 +75,25 @@ Return only a JSON array of 3 task objects, no other text.`;
     return NextResponse.json(tasks);
   } catch (error) {
     console.error('AI task generation error:', error);
+    
+    // Handle specific OpenAI errors
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        return NextResponse.json(
+          { error: 'OpenAI API key is invalid or missing' },
+          { status: 401 }
+        );
+      }
+      if (error.message.includes('rate limit')) {
+        return NextResponse.json(
+          { error: 'OpenAI rate limit exceeded. Please try again later.' },
+          { status: 429 }
+        );
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to generate tasks' },
+      { error: 'Failed to generate tasks. Please try again.' },
       { status: 500 }
     );
   }
