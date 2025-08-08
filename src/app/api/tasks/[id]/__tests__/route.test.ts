@@ -35,7 +35,7 @@ describe('/api/tasks/[id]', () => {
       }
       
       const request = createMockRequest(updateData, 'PUT')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.PUT(request, { params })
       
@@ -58,7 +58,7 @@ describe('/api/tasks/[id]', () => {
       const updateData = { title: 'Updated Task' }
       
       const request = createMockRequest(updateData, 'PUT')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.PUT(request, { params })
       
@@ -75,7 +75,7 @@ describe('/api/tasks/[id]', () => {
       const updateData = { title: 'Updated Task' }
       
       const request = createMockRequest(updateData, 'PUT')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.PUT(request, { params })
       
@@ -92,7 +92,7 @@ describe('/api/tasks/[id]', () => {
       const updateData = { title: 'Updated Task' }
       
       const request = createMockRequest(updateData, 'PUT')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.PUT(request, { params })
       
@@ -107,7 +107,7 @@ describe('/api/tasks/[id]', () => {
       const updateData = { title: 'Updated Task' }
       
       const request = createMockRequest(updateData, 'PUT')
-      const params = { id: invalidTaskId }
+      const params = Promise.resolve({ id: invalidTaskId })
       
       const response = await route.PUT(request, { params })
       
@@ -123,7 +123,7 @@ describe('/api/tasks/[id]', () => {
       const taskId = '507f1f77bcf86cd799439011'
       
       const request = createMockRequest({}, 'DELETE')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.DELETE(request, { params })
       
@@ -140,7 +140,7 @@ describe('/api/tasks/[id]', () => {
       const taskId = 'nonexistent-id'
       
       const request = createMockRequest({}, 'DELETE')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.DELETE(request, { params })
       
@@ -156,7 +156,7 @@ describe('/api/tasks/[id]', () => {
       const taskId = '507f1f77bcf86cd799439011'
       
       const request = createMockRequest({}, 'DELETE')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.DELETE(request, { params })
       
@@ -172,7 +172,7 @@ describe('/api/tasks/[id]', () => {
       const taskId = '507f1f77bcf86cd799439011'
       
       const request = createMockRequest({}, 'DELETE')
-      const params = { id: taskId }
+      const params = Promise.resolve({ id: taskId })
       
       const response = await route.DELETE(request, { params })
       
@@ -186,7 +186,7 @@ describe('/api/tasks/[id]', () => {
       const invalidTaskId = 'invalid-id'
       
       const request = createMockRequest({}, 'DELETE')
-      const params = { id: invalidTaskId }
+      const params = Promise.resolve({ id: invalidTaskId })
       
       const response = await route.DELETE(request, { params })
       

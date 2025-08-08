@@ -10,6 +10,7 @@ export interface ITask {
   createdAt: Date;
   completedAt?: Date;
   aiGenerated: boolean;
+  estimatedTime?: number;
 }
 
 const taskSchema = new mongoose.Schema<ITask>({
@@ -46,6 +47,10 @@ const taskSchema = new mongoose.Schema<ITask>({
   aiGenerated: {
     type: Boolean,
     default: false,
+  },
+  estimatedTime: {
+    type: Number,
+    default: 25,
   },
 });
 

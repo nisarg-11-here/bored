@@ -64,7 +64,7 @@ describe('API Integration Tests', () => {
       }
       
       const updateRequest = createMockRequest(updateData, 'PUT')
-      const updateResponse = await taskRoute.PUT(updateRequest, { params: { id: taskId } })
+      const updateResponse = await taskRoute.PUT(updateRequest, { params: Promise.resolve({ id: taskId }) })
       
       expect(mocks.mockFindByIdAndUpdate).toHaveBeenCalledWith(
         taskId,
@@ -74,7 +74,7 @@ describe('API Integration Tests', () => {
 
       // 4. Delete the task
       const deleteRequest = createMockRequest({}, 'DELETE')
-      const deleteResponse = await taskRoute.DELETE(deleteRequest, { params: { id: taskId } })
+      const deleteResponse = await taskRoute.DELETE(deleteRequest, { params: Promise.resolve({ id: taskId }) })
       
       expect(mocks.mockFindByIdAndDelete).toHaveBeenCalledWith(taskId)
     })
@@ -141,8 +141,8 @@ describe('API Integration Tests', () => {
       const endpoints = [
         { route: tasksRoute.GET, name: 'GET /api/tasks' },
         { route: tasksRoute.POST, name: 'POST /api/tasks', request: createMockRequest({ title: 'Test' }, 'POST') },
-        { route: taskRoute.PUT, name: 'PUT /api/tasks/[id]', request: createMockRequest({ title: 'Updated' }, 'PUT'), params: { id: 'test-id' } },
-        { route: taskRoute.DELETE, name: 'DELETE /api/tasks/[id]', request: createMockRequest({}, 'DELETE'), params: { id: 'test-id' } },
+        { route: taskRoute.PUT, name: 'PUT /api/tasks/[id]', request: createMockRequest({ title: 'Updated' }, 'PUT'), params: Promise.resolve({ id: 'test-id' }) },
+        { route: taskRoute.DELETE, name: 'DELETE /api/tasks/[id]', request: createMockRequest({}, 'DELETE'), params: Promise.resolve({ id: 'test-id' }) },
       ]
 
       for (const endpoint of endpoints) {
