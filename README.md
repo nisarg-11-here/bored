@@ -112,18 +112,61 @@ interface Task {
 
 ## Deployment
 
-### Deploy to Vercel
+### Deploy to Vercel (Recommended)
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+1. **Push your code to GitHub**
+   ```bash
+   git add .
+   git commit -m "Initial commit"
+   git push origin main
+   ```
+
+2. **Connect to Vercel**
+   - Go to [vercel.com](https://vercel.com)
+   - Sign up/login with your GitHub account
+   - Click "New Project"
+   - Import your repository
+
+3. **Configure Environment Variables**
+   In the Vercel dashboard, add these environment variables:
+   - `MONGODB_URI`: Your MongoDB Atlas connection string
+   - `OPENAI_API_KEY`: Your OpenAI API key
+
+4. **Deploy**
+   - Click "Deploy"
+   - Vercel will automatically build and deploy your app
 
 ### Environment Variables for Production
 
 Make sure to set these in your deployment platform:
-- `MONGODB_URI`
-- `OPENAI_API_KEY`
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `MONGODB_URI` | MongoDB Atlas connection string | `mongodb+srv://username:password@cluster.mongodb.net/bored?retryWrites=true&w=majority` |
+| `OPENAI_API_KEY` | OpenAI API key for AI task generation | `sk-...` |
+
+### Alternative Deployment Options
+
+#### Deploy to Netlify
+1. Connect your GitHub repository
+2. Set build command: `npm run build`
+3. Set publish directory: `.next`
+4. Add environment variables
+
+#### Deploy to Railway
+1. Connect your GitHub repository
+2. Add environment variables
+3. Railway will auto-deploy
+
+### Pre-deployment Checklist
+
+- [ ] ✅ All environment variables are set
+- [ ] ✅ MongoDB Atlas is configured and accessible
+- [ ] ✅ OpenAI API key is valid
+- [ ] ✅ Build passes locally (`npm run build`)
+- [ ] ✅ Tests pass (`npm test`)
+- [ ] ✅ No sensitive data in code
+- [ ] ✅ README is updated
 
 ## Contributing
 

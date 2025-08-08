@@ -1,0 +1,35 @@
+# Development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing files
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+jest.config.js
+jest.setup.js
+coverage/
+
+# Documentation
+*.md
+!README.md
+
+# Scripts (not needed in production)
+scripts/
+
+# Debug files
+DATABASE_DEBUG_GUIDE.md
+TEST_DOCUMENTATION.md
+TECHNICAL_DOCUMENTATION.md
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

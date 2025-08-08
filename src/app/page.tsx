@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Sparkles, CheckCircle, Circle, Trash2, Clock, RefreshCw } from 'lucide-react';
+import { Plus, Sparkles, CheckCircle, Circle, Clock, RefreshCw } from 'lucide-react';
 
 interface Task {
   _id: string;
@@ -24,6 +24,12 @@ interface GeneratedTask {
   estimatedTime?: number;
 }
 
+interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState({ title: '', description: '', category: 'personal', priority: 'medium' as 'low' | 'medium' | 'high', estimatedTime: 25 });
@@ -36,11 +42,25 @@ export default function Home() {
     scheduleNotes: ''
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Fetch tasks on component mount
   useEffect(() => {
     fetchTasks();
   }, []);
+
+  // Auto-remove toasts after 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setToasts(prev => prev.slice(1));
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [toasts]);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
 
   const fetchTasks = async () => {
     try {
@@ -50,6 +70,7 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
       setTasks([]);
+      showToast('Failed to load tasks', 'error');
     }
   };
 
@@ -70,24 +91,40 @@ export default function Home() {
         setTasks([task, ...(tasks || [])]);
         if (!taskData) {
           setNewTask({ title: '', description: '', category: 'personal', priority: 'medium', estimatedTime: 25 });
+          showToast('Task added successfully!');
         }
+      } else {
+        showToast('Failed to add task', 'error');
       }
     } catch (error) {
       console.error('Failed to create task:', error);
+      showToast('Failed to add task', 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
   const addGeneratedTask = async (generatedTask: GeneratedTask) => {
-    await createTask({
-      title: generatedTask.title,
-      description: generatedTask.description,
-      category: generatedTask.category,
-      priority: generatedTask.priority,
-      aiGenerated: true,
-      estimatedTime: generatedTask.estimatedTime
-    });
+    try {
+      await createTask({
+        title: generatedTask.title,
+        description: generatedTask.description,
+        category: generatedTask.category,
+        priority: generatedTask.priority,
+        aiGenerated: true,
+        estimatedTime: generatedTask.estimatedTime
+      });
+      
+      // Remove the task from generated tasks list
+      setGeneratedTasks(prev => prev.filter(task => 
+        task.title !== generatedTask.title || 
+        task.description !== generatedTask.description
+      ));
+      
+      showToast(`"${generatedTask.title}" added to your tasks!`);
+    } catch (error) {
+      showToast('Failed to add AI task', 'error');
+    }
   };
 
   const toggleTask = async (taskId: string, completed: boolean) => {
@@ -102,14 +139,25 @@ export default function Home() {
       });
       
       if (response.ok) {
+        const updatedTask = await response.json();
         setTasks((tasks || []).map(task => 
-          task._id === taskId 
-            ? { ...task, completed, completedAt: completed ? new Date().toISOString() : undefined }
-            : task
+          task._id === taskId ? updatedTask : task
         ));
+        
+        const task = tasks.find(t => t._id === taskId);
+        if (task) {
+          showToast(
+            completed 
+              ? `"${task.title}" marked as complete!` 
+              : `"${task.title}" marked as incomplete!`
+          );
+        }
+      } else {
+        showToast('Failed to update task', 'error');
       }
     } catch (error) {
-      console.error('Failed to update task:', error);
+      console.error('Failed to toggle task:', error);
+      showToast('Failed to update task', 'error');
     }
   };
 
@@ -120,10 +168,18 @@ export default function Home() {
       });
       
       if (response.ok) {
+        const task = tasks.find(t => t._id === taskId);
         setTasks((tasks || []).filter(task => task._id !== taskId));
+        
+        if (task) {
+          showToast(`"${task.title}" deleted successfully!`);
+        }
+      } else {
+        showToast('Failed to delete task', 'error');
       }
     } catch (error) {
       console.error('Failed to delete task:', error);
+      showToast('Failed to delete task', 'error');
     }
   };
 
@@ -137,11 +193,15 @@ export default function Home() {
       });
       
       if (response.ok) {
-        const aiTasks = await response.json();
-        setGeneratedTasks(aiTasks);
+        const generatedTasksData = await response.json();
+        setGeneratedTasks(generatedTasksData);
+        showToast(`Generated ${generatedTasksData.length} new task suggestions!`, 'info');
+      } else {
+        showToast('Failed to generate tasks', 'error');
       }
     } catch (error) {
       console.error('Failed to generate AI tasks:', error);
+      showToast('Failed to generate tasks', 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -149,15 +209,7 @@ export default function Home() {
 
   const clearGeneratedTasks = () => {
     setGeneratedTasks([]);
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'text-red-500';
-      case 'medium': return 'text-yellow-500';
-      case 'low': return 'text-green-500';
-      default: return 'text-gray-500';
-    }
+    showToast('Generated tasks cleared!', 'info');
   };
 
   const getCategoryColor = (category: string) => {
@@ -203,6 +255,24 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Toast Notifications */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`px-4 py-3 rounded-lg shadow-lg text-white font-medium transform transition-all duration-300 ${
+              toast.type === 'success' 
+                ? 'bg-green-500' 
+                : toast.type === 'error' 
+                ? 'bg-red-500' 
+                : 'bg-blue-500'
+            }`}
+          >
+            {toast.message}
+          </div>
+        ))}
+      </div>
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -327,7 +397,7 @@ export default function Home() {
             )}
           </div>
 
-          {/* Right Column - Your To-Do List */}
+          {/* Right Column - Task Management */}
           <div className="space-y-6">
             {/* Add Your Own Task - Fixed at Top */}
             <div className="bg-white rounded-lg p-6 shadow-lg border border-gray-200">
@@ -340,6 +410,7 @@ export default function Home() {
                   <RefreshCw className="w-4 h-4" />
                 </button>
               </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <input
                   type="text"
@@ -350,7 +421,7 @@ export default function Home() {
                 />
                 <input
                   type="number"
-                  placeholder="Estimated time (mins)"
+                  placeholder="25"
                   value={newTask.estimatedTime}
                   onChange={(e) => setNewTask({...newTask, estimatedTime: parseInt(e.target.value) || 25})}
                   className="p-2 border-2 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600 focus:border-blue-600 placeholder-gray-500"

@@ -12,7 +12,8 @@
     "test:coverage": "jest --coverage",
     "db:health": "node scripts/test-db.js",
     "db:check": "curl -s http://localhost:3000/api/health/database | jq .",
-    "db:debug": "node scripts/debug-env.js"
+    "db:debug": "node scripts/debug-env.js",
+    "deploy:prepare": "./scripts/deploy.sh"
   },
   "dependencies": {
     "@types/mongodb": "^4.0.7",
@@ -21,7 +22,6 @@
     "mongodb": "^6.18.0",
     "mongoose": "^8.17.1",
     "next": "15.4.6",
-    "node": "^22.18.0",
     "openai": "^5.12.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
